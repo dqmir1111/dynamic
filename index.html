@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <!-- Полноэкранный режим на iOS (PWA) -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Настройки">
+    
+    <title>Настройки</title>
+    <style>
+        :root {
+            --bg-color: #000000;
+            --card-bg: #1c1c1e;
+            --text-color: #ffffff;
+            --secondary-text: #8e8e93;
+            --accent-blue: #0a84ff;
+            --accent-green: #30d158;
+            --separator: #38383a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* Изначально перевернуто на 180 градусов */
+        #app-wrapper {
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            padding: 68px 16px 40px 16px;
+            transition: transform 0.65s cubic-bezier(0.32, 0.72, 0, 1);
+            transform-origin: center center;
+            transform: rotate(180deg);
+        }
+
+        #app-wrapper.normal-side {
+            transform: rotate(0deg);
+        }
+
+        /* Dynamic Island */
+        #dynamic-island-container {
+            position: fixed;
+            top: 11px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        #dynamic-island {
+            background-color: #000000;
+            background-size: cover;
+            background-position: center;
+            width: 126px;
+            height: 37px;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+            transition: all 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 0 9px;
+            overflow: hidden;
+            pointer-events: auto;
+            position: relative;
+        }
+
+        /* Разноцветный режим (RGB) */
+        @keyframes rainbowFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        #dynamic-island.rainbow {
+            background: linear-gradient(270deg, #ff2d55, #ff9500, #ffcc00, #30d158, #0a84ff, #5e5ce6, #bf5af2);
+            background-size: 400% 400%;
+            animation: rainbowFlow 5s ease infinite;
+            border-color: rgba(255, 255, 255, 0.35);
+            box-shadow: 0 0 20px rgba(191, 90, 242, 0.45);
+        }
+
+        /* Увеличенный объектив фронтальной камеры Apple */
+        .island-camera {
+            width: 21px;
+            height: 21px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #3a66a8 0%, #11263c 45%, #050505 85%, #000000 100%);
+            border: 2.5px solid #0f0f12;
+            box-shadow: 
+                inset 0 2px 4px rgba(255, 255, 255, 0.35),
+                inset 0 -2px 4px rgba(10, 132, 255, 0.25),
+                0 0 4px rgba(0, 0, 0, 0.8);
+            flex-shrink: 0;
+            z-index: 2;
+            position: relative;
+        }
+
+        /* Маленький внутренний блик линзы */
+        .island-camera::after {
+            content: "";
+            position: absolute;
+            top: 4px;
+            left: 5px;
+            width: 5px;
+            height: 3px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.45);
+            transform: rotate(-30deg);
+        }
+
+        /* Индикатор микрофона/камеры */
+        .privacy-dot {
+            width: 6.5px;
+            height: 6.5px;
+            border-radius: 50%;
+            background-color: #30d158;
+            margin-right: 12px;
+            box-shadow: 0 0 6px #30d158;
+            z-index: 2;
+        }
+
+        /* Заголовок в стиле iOS */
+        h1 {
+            font-size: 34px;
+            font-weight: 700;
+            margin-bottom: 18px;
+            letter-spacing: -0.4px;
+            padding-left: 4px;
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 400;
+            color: var(--secondary-text);
+            text-transform: uppercase;
+            margin: 24px 0 7px 16px;
+            letter-spacing: -0.08px;
+        }
+
+        .section-footer {
+            font-size: 13px;
+            color: var(--secondary-text);
+            margin: 8px 16px 0 16px;
+            line-height: 1.35;
+        }
+
+        /* Карточки настроек */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 11px;
+            overflow: hidden;
+        }
+
+        .row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 11px 16px;
+            min-height: 46px;
+            position: relative;
+        }
+
+        /* Разделитель как в iOS (с отступом под иконку) */
+        .row:not(:last-child)::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 58px;
+            right: 0;
+            height: 0.5px;
+            background-color: var(--separator);
+        }
+
+        .row-label {
+            font-size: 17px;
+            letter-spacing: -0.4px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            color: #fff;
+        }
+
+        /* Иконки настроек Apple (SF Symbols в квадратах) */
+        .apple-icon {
+            width: 29px;
+            height: 29px;
+            border-radius: 7px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .apple-icon svg {
+            width: 18px;
+            height: 18px;
+            fill: #ffffff;
+        }
+
+        /* Сегментированный переключатель iOS */
+        .segmented-wrapper {
+            padding: 12px 16px;
+            position: relative;
+        }
+        
+        .segmented-wrapper::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 16px;
+            right: 0;
+            height: 0.5px;
+            background-color: var(--separator);
+        }
+
+        .segmented-control {
+            display: flex;
+            background: #2c2c2e;
+            border-radius: 8.5px;
+            padding: 2px;
+        }
+
+        .segment-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #ffffff;
+            padding: 6px 0;
+            font-size: 13px;
+            font-weight: 500;
+            border-radius: 7px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .segment-btn.active {
+            background: #636366;
+            font-weight: 600;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12), 0 3px 1px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Оригинальный тумблер iOS */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 51px;
+            height: 31px;
+            flex-shrink: 0;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #39393d;
+            transition: .25s ease-in-out;
+            border-radius: 31px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 27px;
+            width: 27px;
+            left: 2px;
+            bottom: 2px;
+            background-color: #ffffff;
+            transition: .25s cubic-bezier(0.32, 0.72, 0, 1);
+            border-radius: 50%;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.15), 0 1px 1px rgba(0,0,0,0.16);
+        }
+
+        input:checked + .slider {
+            background-color: var(--accent-green);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+        /* Выбор цвета */
+        .color-picker-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        input[type="color"] {
+            -webkit-appearance: none;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            background: none;
+            padding: 0;
+        }
+
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+
+        input[type="color"]::-webkit-color-swatch {
+            border: 2px solid rgba(255,255,255,0.8);
+            border-radius: 50%;
+        }
+
+        /* Кнопка загрузки фото */
+        .upload-btn {
+            color: var(--accent-blue);
+            font-size: 17px;
+            font-weight: 400;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .upload-btn:active {
+            opacity: 0.6;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .chevron {
+            width: 8px;
+            height: 13px;
+            fill: #545458;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app-wrapper">
+        <!-- Dynamic Island -->
+        <div id="dynamic-island-container">
+            <div id="dynamic-island" class="rainbow">
+                <div class="privacy-dot" id="privacy-dot"></div>
+                <div class="island-camera"></div>
+            </div>
+        </div>
+
+        <h1>Настройки</h1>
+
+        <!-- Кастомизация Dynamic Island -->
+        <div class="section-title">Оформление Dynamic Island</div>
+        <div class="card">
+            <div class="segmented-wrapper">
+                <div class="segmented-control">
+                    <button class="segment-btn" id="btn-default" onclick="setIslandTheme('default')">Стандарт</button>
+                    <button class="segment-btn active" id="btn-rainbow" onclick="setIslandTheme('rainbow')">Разноцветный</button>
+                    <button class="segment-btn" id="btn-custom" onclick="setIslandTheme('custom')">Свой стиль</button>
+                </div>
+            </div>
+
+            <!-- Выбор своего цвета -->
+            <div class="row" onclick="document.getElementById('color-input').click()">
+                <div class="row-label">
+                    <div class="apple-icon" style="background: linear-gradient(135deg, #ff2d55, #5e5ce6);">
+                        <!-- SF Symbol: paintpalette.fill -->
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10c1.38 0 2.5-1.12 2.5-2.5 0-.61-.23-1.17-.61-1.6-.36-.4-.56-.92-.56-1.45 0-1.38 1.12-2.5 2.5-2.5H17c2.76 0 5-2.24 5-5 0-4.97-4.48-9-10-9zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 8 6.5 8 8 8.67 8 9.5 7.33 11 6.5 11zm3-4C8.67 7 8 6.33 8 5.5S8.67 4 9.5 4s1.5.67 1.5 1.5S10.33 7 9.5 7zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 4 14.5 4s1.5.67 1.5 1.5S15.33 7 14.5 7zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 8 17.5 8s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+                        </svg>
+                    </div>
+                    <span>Свой цвет</span>
+                </div>
+                <div class="color-picker-wrap">
+                    <input type="color" id="color-input" value="#0a84ff" oninput="applyCustomColor(this.value)">
+                </div>
+            </div>
+
+            <!-- Загрузка своей картинки -->
+            <label class="row" for="image-upload" style="cursor: pointer;">
+                <div class="row-label">
+                    <div class="apple-icon" style="background: #0a84ff;">
+                        <!-- SF Symbol: photo.fill -->
+                        <svg viewBox="0 0 24 24">
+                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9.5 5.5c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm9.5 9.5H5l4-5 3 3.5 4-5.5 3 7z"/>
+                        </svg>
+                    </div>
+                    <span>Картинка на островок</span>
+                </div>
+                <div class="upload-btn">
+                    <span id="upload-status">Выбрать</span>
+                    <svg class="chevron" viewBox="0 0 8 13">
+                        <path d="M1.5 1L7 6.5L1.5 12" stroke="#545458" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                    </svg>
+                </div>
+                <input type="file" id="image-upload" accept="image/*" onchange="applyCustomImage(event)">
+            </label>
+
+            <!-- Зеленая точка индикатора -->
+            <div class="row">
+                <div class="row-label">
+                    <div class="apple-icon" style="background: #30d158;">
+                        <!-- SF Symbol: circle.Grid / indicator -->
+                        <svg viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="7"/>
+                        </svg>
+                    </div>
+                    <span>Индикатор камеры</span>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" checked onchange="togglePrivacyDot(this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+        <div class="section-footer">Выберите готовый градиент, задайте собственный цвет заливки или установите любое изображение из Фотопленки внутрь Dynamic Island.</div>
+
+        <!-- Ориентация экрана -->
+        <div class="section-title">Положение экрана</div>
+        <div class="card">
+            <div class="row">
+                <div class="row-label">
+                    <div class="apple-icon" style="background: #ff3b30;">
+                        <!-- SF Symbol: arrow.triangle.2.circlepath -->
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
+                        </svg>
+                    </div>
+                    <span>Вверх ногами</span>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="flip-toggle" checked onchange="toggleUpsideDown(this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const wrapper = document.getElementById('app-wrapper');
+        const island = document.getElementById('dynamic-island');
+        const privacyDot = document.getElementById('privacy-dot');
+        const uploadStatus = document.getElementById('upload-status');
+        
+        const btnDefault = document.getElementById('btn-default');
+        const btnRainbow = document.getElementById('btn-rainbow');
+        const btnCustom = document.getElementById('btn-custom');
+
+        let savedColor = '#0a84ff';
+        let savedImage = null;
+
+        // Переключение вкладок стиля Dynamic Island
+        function setActiveButton(activeBtn) {
+            [btnDefault, btnRainbow, btnCustom].forEach(b => b.classList.remove('active'));
+            activeBtn.classList.add('active');
+        }
+
+        function setIslandTheme(theme) {
+            island.classList.remove('rainbow');
+            island.style.backgroundImage = 'none';
+            island.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.8)';
+            island.style.borderColor = 'rgba(255, 255, 255, 0.14)';
+
+            if (theme === 'default') {
+                setActiveButton(btnDefault);
+                island.style.backgroundColor = '#000000';
+            } 
+            else if (theme === 'rainbow') {
+                setActiveButton(btnRainbow);
+                island.classList.add('rainbow');
+            } 
+            else if (theme === 'custom') {
+                setActiveButton(btnCustom);
+                if (savedImage) {
+                    island.style.backgroundImage = `url(${savedImage})`;
+                    island.style.borderColor = 'rgba(255, 255, 255, 0.35)';
+                } else {
+                    applyCustomColor(savedColor);
+                }
+            }
+        }
+
+        // Применение своего цвета
+        function applyCustomColor(color) {
+            savedColor = color;
+            savedImage = null; // сбрасываем картинку, если выбрали цвет
+            uploadStatus.textContent = 'Выбрать';
+            
+            setActiveButton(btnCustom);
+            island.classList.remove('rainbow');
+            island.style.backgroundImage = 'none';
+            island.style.backgroundColor = color;
+            island.style.borderColor = 'rgba(255, 255, 255, 0.35)';
+            island.style.boxShadow = `0 0 18px ${color}80`;
+        }
+
+        // Загрузка своей картинки в Dynamic Island
+        function applyCustomImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                savedImage = e.target.result;
+                setActiveButton(btnCustom);
+                island.classList.remove('rainbow');
+                island.style.backgroundImage = `url(${savedImage})`;
+                island.style.borderColor = 'rgba(255, 255, 255, 0.4)';
+                island.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.9)';
+                uploadStatus.textContent = 'Загружено';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Индикатор камеры (зеленая точка)
+        function togglePrivacyDot(isVisible) {
+            privacyDot.style.display = isVisible ? 'block' : 'none';
+        }
+
+        // Переворот экрана (изначально включен)
+        function toggleUpsideDown(isUpsideDown) {
+            if (isUpsideDown) {
+                wrapper.classList.remove('normal-side');
+            } else {
+                wrapper.classList.add('normal-side');
+            }
+        }
+    </script>
+</body>
+</html>
