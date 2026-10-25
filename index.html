@@ -80,7 +80,7 @@
             display: flex;
             align-items: center;
             justify-content: flex-end;
-            padding: 0 9px;
+            padding: 0 6px;
             overflow: hidden;
             pointer-events: auto;
             position: relative;
@@ -101,32 +101,31 @@
             box-shadow: 0 0 20px rgba(191, 90, 242, 0.45);
         }
 
-        /* Увеличенный объектив фронтальной камеры Apple */
+        /* Увеличенная черная фронтальная камера */
         .island-camera {
-            width: 21px;
-            height: 21px;
+            width: 26px;
+            height: 26px;
             border-radius: 50%;
-            background: radial-gradient(circle at 35% 35%, #3a66a8 0%, #11263c 45%, #050505 85%, #000000 100%);
-            border: 2.5px solid #0f0f12;
+            background: radial-gradient(circle at 35% 35%, #121214 0%, #050505 55%, #000000 100%);
+            border: 2px solid #0a0a0c;
             box-shadow: 
-                inset 0 2px 4px rgba(255, 255, 255, 0.35),
-                inset 0 -2px 4px rgba(10, 132, 255, 0.25),
-                0 0 4px rgba(0, 0, 0, 0.8);
+                inset 0 1px 3px rgba(255, 255, 255, 0.12),
+                0 0 6px rgba(0, 0, 0, 0.95);
             flex-shrink: 0;
             z-index: 2;
             position: relative;
         }
 
-        /* Маленький внутренний блик линзы */
+        /* Едва заметный темный блик внутри черной линзы */
         .island-camera::after {
             content: "";
             position: absolute;
-            top: 4px;
-            left: 5px;
+            top: 5px;
+            left: 6px;
             width: 5px;
             height: 3px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.45);
+            background: rgba(255, 255, 255, 0.18);
             transform: rotate(-30deg);
         }
 
@@ -488,7 +487,7 @@
                 setActiveButton(btnDefault);
                 island.style.backgroundColor = '#000000';
             } 
-            else if (theme === 'rainbow') {
+<!DOCTYPE html>else if (theme === 'rainbow') {
                 setActiveButton(btnRainbow);
                 island.classList.add('rainbow');
             } 
